@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الظلام الأبدي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            /* خلفية ثابتة بدون حركة */
+            background-image: url('background-image.gif');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* إزالة طبقة الضباب المتحركة */
+        .fog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* طبقة الاهتزاز عند التحميل */
+        .loading-shake {
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* الحاوية الرئيسية */
+        .container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 50px 20px;
+            z-index: 2;
+        }
+
+        /* صورة النص العلوية */
+        .top-text-image {
+            position: relative;
+            margin-top: 80px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px #ff0000);
+        }
+
+        .top-text-image img {
+            max-width: 400px;
+            height: auto;
+            content: url('top-text-image.png');
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* المربع المركزي */
+        .center-box {
+            position: relative;
+            width: 350px;
+            height: 450px;
+            background: linear-gradient(145deg, #1a0000, #330000);
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #8b0000, #ff0000, #8b0000, #400000) 1;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 
+                0 0 30px rgba(255, 0, 0, 0.5),
+                inset 0 0 30px rgba(0, 0, 0, 0.8);
+            animation: glow 2s infinite alternate;
+            overflow: visible;
+        }
+
+        .center-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0000, #8b0000, #ff0000);
+            border-radius: 15px;
+            z-index: -1;
+            animation: borderRotate 3s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.8); }
+            100% { box-shadow: 0 0 50px rgba(255, 0, 0, 0.8), inset 0 0 50px rgba(0, 0, 0, 0.9); }
+        }
+
+        /* الصورة فوق المربع */
+        .center-image {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 150px;
+            z-index: 10;
+        }
+
+        .center-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            content: url('center-image.png');
+            filter: drop-shadow(0 0 15px #ff0000);
+        }
+
+        /* الأزرار الدائرية - أكبر حجماً وفوق بعض */
+        .buttons-container {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .horror-button {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ff0000, #8b0000);
+            border: 3px solid #ff4444;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 5px 15px rgba(255, 0, 0, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .horror-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .horror-button:hover::before {
+            left: 100%;
+        }
+
+        .horror-button:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 8px 20px rgba(255, 0, 0, 0.7),
+                inset 0 2px 0 rgba(255, 255, 255, 0.2);
+            border-color: #ff6666;
+            background: radial-gradient(circle, #ff2222, #cc0000);
+        }
+
+        .horror-button:active {
+            transform: scale(0.95);
+        }
+
+        /* الفيديو المخفي */
+        .hidden-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 80%;
+            max-width: 600px;
+            height: auto;
+            z-index: 1000;
+            border: 3px solid #ff0000;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .hidden-video.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            animation: glitch 0.1s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            20% { transform: translate(-48%, -50%) scale(1.01); }
+            40% { transform: translate(-52%, -49%) scale(0.99); }
+            60% { transform: translate(-50%, -51%) scale(1.02); }
+            80% { transform: translate(-49%, -50%) scale(0.98); }
+        }
+
+        /* تأثير الشاشة المتشققة */
+        .screen-crack {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(45deg, transparent 48%, rgba(255, 0, 0, 0.1) 49%, rgba(255, 0, 0, 0.1) 51%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, rgba(255, 0, 0, 0.05) 49%, rgba(255, 0, 0, 0.05) 51%, transparent 52%);
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .screen-crack.active {
+            opacity: 1;
+        }
+
+        /* الطبقة المظلمة للفيديو */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .video-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* تأثيرات الإضاءة المتحركة */
+        .lightning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .lightning.flash {
+            animation: lightning 0.2s ease-out;
+        }
+
+        @keyframes lightning {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* تحسينات للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 15px;
+            }
+            
+            .center-box {
+                width: 280px;
+                height: 380px;
+            }
+            
+            .top-text-image img {
+                max-width: 300px;
+            }
+            
+            .buttons-container {
+                position: absolute;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+                align-items: center;
+            }
+            
+            .horror-button {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body class="loading-shake">
+    <!-- طبقة الضباب الثابتة -->
+    <div class="fog-overlay"></div>
+    
+    <!-- طبقة الإضاءة -->
+    <div class="lightning"></div>
+    
+    <!-- طبقة الشاشة المتشققة -->
+    <div class="screen-crack"></div>
+    
+    <!-- الحاوية الرئيسية -->
+    <div class="container">
+        <!-- صورة النص العلوية -->
+        <div class="top-text-image">
+            <img src="top-text-image.png" alt="نص مرعب" onerror="this.style.display='none'">
+        </div>
+        
+        <!-- المربع المركزي -->
+        <div class="center-box">
+            <!-- صورة النص فوق المربع -->
+            <div class="center-image">
+                <img src="center-image.png" alt="صورة مرعبة" onerror="this.style.display='none'">
+            </div>
+            
+            <!-- الأزرار داخل المربع -->
+            <div class="buttons-container" id="buttonsContainer">
+                <button class="horror-button" id="redirectBtn"></button>
+                <button class="horror-button" id="videoBtn"></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- طبقة الفيديو -->
+    <div class="video-overlay" id="videoOverlay">
+        <video class="hidden-video" id="hiddenVideo" controls>
+            <source src="hidden-video.mp4" type="video/mp4">
+            متصفحك لا يدعم تشغيل الفيديو.
+        </video>
+    </div>
+
+    <!-- ملفات الصوت -->
+    <audio id="backgroundSound" loop>
+        <source src="background-sound.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="clickSound">
+        <source src="button-click.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // متغيرات عامة
+        let audioEnabled = false;
+        let isVideoShowing = false;
+        
+        // عناصر الصوت
+        const backgroundSound = document.getElementById('backgroundSound');
+        const clickSound = document.getElementById('clickSound');
+        
+        // عناصر أخرى
+        const redirectBtn = document.getElementById('redirectBtn');
+        const videoBtn = document.getElementById('videoBtn');
+        const videoOverlay = document.getElementById('videoOverlay');
+        const hiddenVideo = document.getElementById('hiddenVideo');
+        const lightning = document.querySelector('.lightning');
+        const screenCrack = document.querySelector('.screen-crack');
+
+        // إزالة تأثير الاهتزاز بعد التحميل
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.body.classList.remove('loading-shake');
+                createLightningEffect();
+            }, 1000);
+        });
+
+        // تفعيل الصوت عند أول تفاعل
+        function enableAudio() {
+            if (!audioEnabled) {
+                backgroundSound.volume = 0.3;
+                backgroundSound.play().catch(e => console.log('لا يمكن تشغيل الصوت الخلفي'));
+                audioEnabled = true;
+            }
+        }
+
+        // تشغيل صوت النقر
+        function playClickSound() {
+            clickSound.currentTime = 0;
+            clickSound.volume = 0.7;
+            clickSound.play().catch(e => console.log('لا يمكن تشغيل صوت النقر'));
+        }
+
+        // تأثير الإضاءة العشوائي
+        function createLightningEffect() {
+            setInterval(() => {
+                if (Math.random() < 0.1) { // 10% احتمال كل ثانية
+                    lightning.classList.add('flash');
+                    setTimeout(() => {
+                        lightning.classList.remove('flash');
+                    }, 200);
+                }
+            }, 1000);
+        }
+
+        // تأثير الشاشة المتشققة
+        function activateScreenCrack() {
+            screenCrack.classList.add('active');
+            setTimeout(() => {
+                screenCrack.classList.remove('active');
+            }, 1000);
+        }
+
+        // معالج النقر على الزر الأول (التوجيه)
+        redirectBtn.addEventListener('click', () => {
+            enableAudio();
+            playClickSound();
+            activateScreenCrack();
+            
+            setTimeout(() => {
+                window.open('https://nidali.vercel.app/', '_blank');
+            }, 500);
+        });
+
+        // معالج النقر على الزر الثاني (الفيديو)
+        videoBtn.addEventListener('click', () => {
+            enableAudio();
+            playClickSound();
+            
+            if (!isVideoShowing) {
+                showVideo();
+            }
+        });
+
+        // عرض الفيديو المخفي
+        function showVideo() {
+            isVideoShowing = true;
+            videoOverlay.classList.add('show');
+            hiddenVideo.classList.add('show');
+            
+            // تأثير الجليتش
+            setTimeout(() => {
+                hiddenVideo.play().catch(e => console.log('لا يمكن تشغيل الفيديو'));
+            }, 500);
+        }
+
+        // إخفاء الفيديو عند النقر على الخلفية
+        videoOverlay.addEventListener('click', (e) => {
+            if (e.target === videoOverlay) {
+                hideVideo();
+            }
+        });
+
+        // إخفاء الفيديو
+        function hideVideo() {
+            isVideoShowing = false;
+            videoOverlay.classList.remove('show');
+            hiddenVideo.classList.remove('show');
+            hiddenVideo.pause();
+            hiddenVideo.currentTime = 0;
+        }
+
+        // إضافة مؤثرات صوتية عند المرور على الأزرار
+        document.querySelectorAll('.horror-button').forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                button.style.filter = 'brightness(1.2)';
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                button.style.filter = 'brightness(1)';
+            });
+        });
+
+        // منع النقر الأيمن
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            activateScreenCrack();
+        });
+
+        // تأثيرات المفاتيح
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isVideoShowing) {
+                hideVideo();
+            }
+        });
+
+        // تحسين الأداء - إيقاف الأنيميشن عند عدم التركيز
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (audioEnabled) {
+                    backgroundSound.pause();
+                }
+            } else {
+                if (audioEnabled) {
+                    backgroundSound.play().catch(e => console.log('خطأ في تشغيل الصوت'));
+                }
+            }
+        });
+    </script>
+</body>
+</html>
